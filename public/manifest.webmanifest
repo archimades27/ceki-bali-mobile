@@ -1,0 +1,19 @@
+{
+  "name": "Ceki Bali Mobile",
+  "short_name": "Ceki Bali",
+  "description": "Permainan kartu tradisional Bali 5 pemain versi Portrait Mobile (Offline, Online & LAN)",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "theme_color": "#140905",
+  "background_color": "#140905",
+  "icons": [
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
