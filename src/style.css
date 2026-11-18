@@ -480,12 +480,12 @@ select {
 }
 
 .seat-top-left {
-  top: 4%;
+  top: 1%;
   left: 4px;
 }
 
 .seat-top-right {
-  top: 4%;
+  top: 1%;
   right: 4px;
 }
 
@@ -501,12 +501,12 @@ select {
 
 .my-table-discard {
   position: absolute;
-  bottom: 56px;
-  right: 6px;
+  bottom: 48px;
+  right: 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   z-index: 6;
 }
 
@@ -675,8 +675,8 @@ select {
 }
 
 .seat-discard-btn .ceki-card--small {
-  width: clamp(38px, 10.5vw, 46px);
-  max-width: 46px;
+  width: clamp(30px, 8.2vw, 36px);
+  max-width: 36px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
   transition: transform 0.14s ease;
 }
@@ -688,16 +688,19 @@ select {
 }
 
 .seat-discard-btn.is-ngejuk-ready .ceki-card--small {
-  width: clamp(44px, 12vw, 54px);
-  max-width: 54px;
+  width: clamp(38px, 10.2vw, 46px);
+  max-width: 46px;
   outline: 2px solid #4ade80;
   box-shadow: 0 0 18px rgba(74, 222, 128, 0.9);
   transform: scale(1.03);
 }
 
 .seat-ngejuk-pill {
-  padding: 4px 12px;
-  font-size: 11px;
+  position: relative;
+  margin-top: -10px;
+  z-index: 12;
+  padding: 3px 10px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.4px;
   color: #ecfdf5;
@@ -706,7 +709,7 @@ select {
   border-radius: 999px;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7), 0 0 10px rgba(74, 222, 128, 0.65);
-  min-height: 28px;
+  min-height: 26px;
 }
 
 .seat-ngejuk-pill:active {
@@ -727,8 +730,8 @@ select {
 }
 
 .open-ngejuk-mini.ceki-card--small {
-  width: clamp(28px, 7.5vw, 34px);
-  max-width: 34px;
+  width: clamp(24px, 6.5vw, 30px);
+  max-width: 30px;
   transition: transform 0.14s ease;
 }
 
@@ -766,25 +769,26 @@ select {
 /* Inside Bottom of Table: GILIRAN ANDA + Susun */
 .table-bottom-controls {
   position: absolute;
-  bottom: 14px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 92%;
+  width: auto;
+  max-width: 64%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   z-index: 6;
 }
 
 .turn-banner-pill {
-  flex: 1;
-  max-width: 210px;
+  flex: 0 1 auto;
+  max-width: 156px;
   text-align: center;
-  padding: 6px 12px;
-  font-size: 12px;
+  padding: 5px 10px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.7px;
+  letter-spacing: 0.5px;
   background: rgba(15, 20, 28, 0.9);
   border: 1.5px solid var(--gold-dark);
   color: var(--text-muted);
