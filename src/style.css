@@ -427,7 +427,7 @@ select {
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  z-index: 3;
+  z-index: 8;
   margin-top: -16px;
 }
 
@@ -485,10 +485,11 @@ select {
 /* Opponent Seats (4 symmetric seats around vertical oval) */
 .opponent-seat {
   position: absolute;
+  max-width: 114px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   z-index: 5;
   content-visibility: auto;
   contain-intrinsic-size: auto 96px auto 130px;
@@ -668,14 +669,14 @@ select {
 }
 
 .open-stack-card.ceki-card--small {
-  width: clamp(20px, 5.4vw, 24px);
-  max-width: 24px;
+  width: clamp(19px, 5.2vw, 23px);
+  max-width: 23px;
   transition: transform 0.14s ease;
 }
 
 .seat-ready-cards .open-stack-card:not(:first-child),
 .seat-open-ngejuk .open-stack-card:not(:first-child) {
-  margin-left: -6px;
+  margin-left: -8px;
 }
 
 .seat-ready-cards:hover .open-stack-card.ceki-card--small,
