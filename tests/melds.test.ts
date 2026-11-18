@@ -488,4 +488,54 @@ for (let step = 0; step < 30 && state.phase !== 'round_over'; step++) {
   assert.equal(canDiscardCard(nyariOpenState, 0, jukCard.id), true, 'Open ngejuk card CAN be discarded when it triggers Nyari');
 }
 
+// 12. Mencari vs Nyaga rules (Mencari CAN win from buangan/Ngejuk; Nyaga CANNOT) & Ilehan priority
+{
+  const mecari11 = [
+    makeCard('tong1', 1), makeCard('tong1', 2), makeCard('tong1', 3),
+    makeCard('tong2', 1), makeCard('sok2', 1), makeCard('ban2', 1),
+    makeCard('tong3', 1), makeCard('sok3', 1), makeCard('ban3', 1),
+    makeCard('old_thousand', 1), makeCard('old_thousand', 2),
+  ];
+  assert.equal(getReadyStatus(mecari11, 'nyari').mode, 'mecari');
+
+  // Player 0 in Mencari takes old_thousand via Ngejuk -> declareCeki MUST succeed
+  let mecariWin = startNewRound(undefined, 'nyari');
+  mecariWin = {
+    ...mecariWin,
+    currentPlayerIndex: 0,
+    phase: 'awaiting_draw',
+    lastDiscardPlayerIndex: 4,
+    players: mecariWin.players.map((p, idx) =>
+      idx === 0
+        ? { ...p, hand: mecari11, discards: [], readyMode: 'mecari' }
+        : idx === 4
+          ? { ...p, discards: [makeCard('old_thousand', 4)] }
+          : p
+    ),
+  };
+  mecariWin = ngejukDiscard(mecariWin);
+  assert.equal(mecariWin.lastDrawSource, 'ngejuk');
+  const mecariRes = declareCeki(mecariWin, 0);
+  assert.equal(mecariRes.phase, 'round_over', 'Mencari MUST be allowed to win from buangan/Ngejuk');
+  assert.equal(mecariRes.winnerId, 0);
+
+  // Ilehan priority: Player 0 discards old_thousand; Bot 1 (offset 1) & Bot 3 (offset 3) both Mecari -> Bot 1 wins
+  const discardTarget = makeCard('old_thousand', 4);
+  let ilehanState = startNewRound(undefined, 'nyari');
+  ilehanState = {
+    ...ilehanState,
+    currentPlayerIndex: 0,
+    phase: 'awaiting_discard',
+    pendingDrawnCard: null,
+    players: ilehanState.players.map((p, idx) => {
+      if (idx === 0) return { ...p, hand: [...p.hand, discardTarget] };
+      if (idx === 1 || idx === 3) return { ...p, hand: mecari11, readyMode: 'mecari' };
+      return { ...p, readyMode: null };
+    }),
+  };
+  const ilehanRes = discardCard(ilehanState, discardTarget.id, true);
+  assert.equal(ilehanRes.phase, 'round_over');
+  assert.equal(ilehanRes.winnerId, 1, 'Closest player in Ilehan order (offset 1) must win');
+}
+
 console.log('All 5-player Ceki Bali (Soca/Serigat/Nyari) tests passed!');

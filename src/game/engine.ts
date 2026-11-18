@@ -7,7 +7,16 @@ import {
   getNyagaWaits,
   getReadyStatus,
 } from './melds.ts';
-import type { CardInstance, GameState, Player, PlayStyle } from './types.ts';
+import type { CardInstance, GameState, Meld, Player, PlayStyle } from './types.ts';
+
+function extractOpenMeldForCard(
+  hand12: CardInstance[],
+  taken: CardInstance,
+  playStyle: PlayStyle
+): Meld | null {
+  const partial = findBestPartialMelds(hand12, playStyle);
+  return partial.melds.find((m) => m.cards.some((c) => c.id === taken.id)) ?? null;
+}
 
 export function createInitialPlayers(): Player[] {
   return [
@@ -18,6 +27,7 @@ export function createInitialPlayers(): Player[] {
       hand: [],
       discards: [],
       openNgejukCards: [],
+      openMelds: [],
       score: 0,
       avatarText: 'ANDA',
       statusText: 'Giliran Anda',
@@ -30,6 +40,7 @@ export function createInitialPlayers(): Player[] {
       hand: [],
       discards: [],
       openNgejukCards: [],
+      openMelds: [],
       score: 0,
       avatarText: 'M',
       statusText: 'Menunggu',
@@ -42,6 +53,7 @@ export function createInitialPlayers(): Player[] {
       hand: [],
       discards: [],
       openNgejukCards: [],
+      openMelds: [],
       score: 0,
       avatarText: 'N',
       statusText: 'Menunggu',
@@ -54,6 +66,7 @@ export function createInitialPlayers(): Player[] {
       hand: [],
       discards: [],
       openNgejukCards: [],
+      openMelds: [],
       score: 0,
       avatarText: 'K',
       statusText: 'Menunggu',
@@ -66,6 +79,7 @@ export function createInitialPlayers(): Player[] {
       hand: [],
       discards: [],
       openNgejukCards: [],
+      openMelds: [],
       score: 0,
       avatarText: 'W',
       statusText: 'Menunggu',
@@ -110,6 +124,7 @@ export function startNewRound(
         hand: [],
         discards: [],
         openNgejukCards: [],
+        openMelds: [],
         statusText: idx === startPlayerIndex ? 'Giliran' : 'Menunggu',
       }))
     : existingState
@@ -118,6 +133,7 @@ export function startNewRound(
           hand: [],
           discards: [],
           openNgejukCards: [],
+          openMelds: [],
           statusText: idx === startPlayerIndex ? (p.isHuman ? 'Giliran Anda' : 'Giliran') : 'Menunggu',
         }))
       : createInitialPlayers().map((p, idx) => ({
@@ -317,11 +333,16 @@ export function ngejukDiscard(state: GameState): GameState {
     const nextOpenNgejuk = p.isHuman
       ? (p.openNgejukCards ?? [])
       : [...(p.openNgejukCards ?? []), taken];
+    const formedMeld = !p.isHuman ? extractOpenMeldForCard(nextHand, taken, state.playStyle) : null;
+    const nextOpenMelds = formedMeld
+      ? [...(p.openMelds ?? []), formedMeld]
+      : (p.openMelds ?? []);
     return {
       ...p,
       hand: nextHand,
       discards: nextDiscards,
       openNgejukCards: nextOpenNgejuk,
+      openMelds: nextOpenMelds,
       readyMode: p.isHuman ? p.readyMode : null,
       statusText: 'Ngejuk!',
     };
@@ -411,7 +432,20 @@ export function acceptPendingDrawnCard(
       state.lastDrawSource === 'ngejuk'
         ? [...(p.openNgejukCards ?? []), drawn]
         : (p.openNgejukCards ?? []);
-    return { ...p, hand: nextHand, openNgejukCards: nextOpenNgejuk, readyMode: null };
+    const formedMeld =
+      state.lastDrawSource === 'ngejuk'
+        ? extractOpenMeldForCard(nextHand, drawn, state.playStyle)
+        : null;
+    const nextOpenMelds = formedMeld
+      ? [...(p.openMelds ?? []), formedMeld]
+      : (p.openMelds ?? []);
+    return {
+      ...p,
+      hand: nextHand,
+      openNgejukCards: nextOpenNgejuk,
+      openMelds: nextOpenMelds,
+      readyMode: null,
+    };
   });
   return {
     ...state,
@@ -642,16 +676,60 @@ export function discardCard(
     history: nextHistory,
   };
 
-  // Ngenen tidak boleh dari hasil buangan kartu di tangan; hanya dari kupakan tumpukan
+  // Prioritas Pengambilan Buangan (Ilehan):
+  // Pemain dalam posisi Mencari (bukan Nyaga) boleh menyambar buangan untuk menang.
+  // Jika > 1 pemain Mencari menunggu kartu sama, yang paling dekat searah putaran (offset 1..4) menang.
+  for (let offset = 1; offset < updatedPlayers.length; offset++) {
+    const idx = (playerIdx + offset) % updatedPlayers.length;
+    const candidate = updatedPlayers[idx];
+    if (candidate.readyMode !== 'mecari') continue;
+    const winRes = checkWinWithCard(candidate.hand, cardToDiscard, state.playStyle);
+    if (!winRes) continue;
+
+    // Jika pemain manusia tepat di giliran berikutnya (offset 1), biarkan dia memilih Ngejuk -> Ceki
+    if (candidate.isHuman && offset === 1) {
+      break;
+    }
+
+    if (!candidate.isHuman) {
+      const winnerPlayers = updatedPlayers.map((p, pIdx) => {
+        if (pIdx !== idx) return p;
+        return {
+          ...p,
+          hand: [...p.hand, cardToDiscard],
+          score: p.score + 25,
+          statusText: 'Mencari (Sambar)!',
+        };
+      });
+      return {
+        ...nextState,
+        players: winnerPlayers,
+        currentPlayerIndex: idx,
+        phase: 'round_over',
+        botStep: null,
+        winnerId: candidate.id,
+        winKind: 'ceki',
+        winningMelds: winRes.melds,
+        winReason: `${candidate.name} (Mencari) menyambar buangan ${CARD_DEFS[cardToDiscard.key].balineseName} dari ${player.name} (prioritas Ilehan)!`,
+        lastActionLog: `${candidate.name} MENANG (Mencari — Sambar Buangan ${CARD_DEFS[cardToDiscard.key].balineseName})!`,
+        history: [
+          ...nextHistory,
+          {
+            round: state.round,
+            actor: candidate.name,
+            action: 'Menang Mencari (Sambar Buangan)',
+            cardName: CARD_DEFS[cardToDiscard.key].balineseName,
+          },
+        ],
+      };
+    }
+  }
+
   return nextState;
 }
 
 export function declareCeki(state: GameState, playerIndex = state.currentPlayerIndex): GameState {
   if (state.phase === 'round_over' || playerIndex !== state.currentPlayerIndex) {
-    return state;
-  }
-  // Ngenen hanya boleh dari kupakan kartu tumpukan, tidak boleh dari hasil Ngejuk / buangan
-  if (state.lastDrawSource === 'ngejuk') {
     return state;
   }
   const player = state.players[playerIndex];
@@ -665,7 +743,7 @@ export function declareCeki(state: GameState, playerIndex = state.currentPlayerI
       : player.hand;
   if (fullHand.length !== 12) return state;
 
-  // Check Ngandang: self-drawn/self-opened winning card while already Mecari or Mejaga
+  // Check Ngandang / Mencari vs Nyaga:
   let isNgandang = false;
   let melds = findWinningMelds(fullHand, state.playStyle);
   const drawnCard =
@@ -675,16 +753,25 @@ export function declareCeki(state: GameState, playerIndex = state.currentPlayerI
         ? player.hand.find((c) => c.id === state.lastDrawnCardId) ?? null
         : null;
 
+  let readyBeforeMode: 'mecari' | 'mejaga' | null = null;
   if (drawnCard) {
     const base11 = fullHand.filter((c) => c.id !== drawnCard.id);
     if (base11.length === 11) {
       const ready = getReadyStatus(base11, state.playStyle);
+      readyBeforeMode = ready.mode;
       const winRes = checkWinWithCard(base11, drawnCard, state.playStyle);
       if (ready.mode && winRes) {
-        isNgandang = true;
+        isNgandang = state.lastDrawSource !== 'ngejuk';
         melds = winRes.melds;
       }
     }
+  }
+
+  // Aturan Mencari vs Nyaga:
+  // - Mencari (mecari): SAH menang dari hasil buangan (Ngejuk) maupun Ngupak.
+  // - Nyaga (mejaga): DILARANG menang dari hasil buangan (Ngejuk); wajib dari Ngupak sendiri.
+  if (state.lastDrawSource === 'ngejuk' && readyBeforeMode !== 'mecari') {
+    return state;
   }
   if (!melds) return state;
 

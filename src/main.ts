@@ -291,12 +291,10 @@ class CekiPortraitApp {
       }
 
       if (this.state.phase === 'bot_thinking' && this.state.botStep === 'discard') {
-        if (
-          this.state.lastDrawSource !== 'ngejuk' &&
-          findWinningMelds(bot.hand, this.state.playStyle) !== null
-        ) {
-          this.state = declareCeki(this.state, this.state.currentPlayerIndex);
-          if (this.state.phase === 'round_over') sfx.playCekiWin();
+        const afterCeki = declareCeki(this.state, this.state.currentPlayerIndex);
+        if (afterCeki.phase === 'round_over') {
+          this.state = afterCeki;
+          sfx.playCekiWin();
           this.render();
           return;
         }
@@ -1128,19 +1126,23 @@ class CekiPortraitApp {
     }
     cardsRow.appendChild(discardSlot);
 
-    if ((player.openNgejukCards?.length ?? 0) > 0) {
+    const openMeldCards = (player.openMelds ?? []).flatMap((m) => m.cards);
+    const openCardsToDisplay =
+      openMeldCards.length > 0 ? openMeldCards : (player.openNgejukCards ?? []);
+
+    if (openCardsToDisplay.length > 0) {
       const jukSlot = document.createElement('div');
       jukSlot.className = 'seat-card-slot';
 
       const openBtn = document.createElement('button');
       openBtn.type = 'button';
       openBtn.className = 'seat-open-ngejuk';
-      openBtn.title = 'Ketuk untuk lihat detail kartu Jukjukan';
+      openBtn.title = 'Ketuk untuk lihat detail kartu Jukjukan terbuka';
       openBtn.setAttribute('aria-label', `Lihat kartu Jukjukan ${player.name}`);
       openBtn.addEventListener('click', () =>
-        this.openDiscardInspectModal(`Jukjukan ${player.name}`, player.openNgejukCards)
+        this.openDiscardInspectModal(`Jukjukan ${player.name}`, openCardsToDisplay)
       );
-      for (const openCard of player.openNgejukCards) {
+      for (const openCard of openCardsToDisplay.slice(0, 3)) {
         const mini = renderClassicCard(openCard.key, { small: true });
         mini.classList.add('open-ngejuk-mini');
         openBtn.appendChild(mini);
@@ -1148,7 +1150,8 @@ class CekiPortraitApp {
 
       const jukCaption = document.createElement('span');
       jukCaption.className = 'seat-slot-caption seat-slot-caption--juk';
-      jukCaption.textContent = 'Juk';
+      jukCaption.textContent =
+        openMeldCards.length > 0 ? `Juk (${openCardsToDisplay.length})` : 'Juk';
       jukSlot.append(openBtn, jukCaption);
       cardsRow.appendChild(jukSlot);
     }
@@ -1408,10 +1411,12 @@ class CekiPortraitApp {
       ? [...me.hand, state.pendingDrawnCard]
       : me.hand;
     const readyBefore = getReadyStatus(me.hand, state.playStyle);
+    const allowFromSource =
+      state.lastDrawSource !== 'ngejuk' || readyBefore.mode === 'mecari';
     const canCeki =
       isMyTurn &&
       state.phase === 'awaiting_discard' &&
-      state.lastDrawSource !== 'ngejuk' &&
+      allowFromSource &&
       handWithPending.length === 12 &&
       readyBefore.mode !== null &&
       findWinningMelds(handWithPending, state.playStyle) !== null;
@@ -1439,7 +1444,9 @@ class CekiPortraitApp {
     cekiBtn.type = 'button';
     cekiBtn.className = 'btn-thumb btn-thumb--ceki';
     cekiBtn.disabled = !canCeki;
-    cekiBtn.innerHTML = `Ceki!<small>${canCeki ? 'MENANG!' : 'Belum'}</small>`;
+    const nyagaBlocked =
+      isMyTurn && state.lastDrawSource === 'ngejuk' && readyBefore.mode === 'mejaga';
+    cekiBtn.innerHTML = `Ceki!<small>${canCeki ? 'MENANG!' : nyagaBlocked ? 'Wajib Ngupak' : 'Belum'}</small>`;
     cekiBtn.addEventListener('click', () => this.dispatchAction({ type: 'declare_ceki' }));
 
     actions.append(ambilBtn, ngejukBtn, cekiBtn);

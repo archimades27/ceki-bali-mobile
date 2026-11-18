@@ -14,7 +14,6 @@ import {
   sortHumanHand,
   startNewRound,
 } from '../game/engine.ts';
-import { findWinningMelds } from '../game/melds.ts';
 import type { CardInstance, GameState, Player } from '../game/types.ts';
 import type { LobbySeatInfo, RoomStatePayload } from './lanClient.ts';
 
@@ -604,8 +603,9 @@ export class LanHostController {
       this.botTimer = window.setTimeout(() => {
         const bot = this.state.players[this.state.currentPlayerIndex];
         if (!bot || bot.isHuman || this.state.botStep !== 'discard') return;
-        if (this.state.lastDrawSource !== 'ngejuk' && findWinningMelds(bot.hand, this.state.playStyle) !== null) {
-          this.state = declareCeki(this.state, this.state.currentPlayerIndex);
+        const afterCeki = declareCeki(this.state, this.state.currentPlayerIndex);
+        if (afterCeki.phase === 'round_over') {
+          this.state = afterCeki;
           this.resetHumanTurnTimer(false);
           this.broadcastRoom({ type: 'declare_ceki', actorIndex: bot.id });
           return;

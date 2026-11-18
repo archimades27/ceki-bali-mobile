@@ -44,6 +44,7 @@ export interface Player {
   hand: CardInstance[];
   discards: CardInstance[];
   openNgejukCards: CardInstance[];
+  openMelds?: Meld[];
   score: number;
   avatarText: string;
   statusText: string;

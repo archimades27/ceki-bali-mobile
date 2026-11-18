@@ -37,12 +37,20 @@ export class TutorialModal {
       </div>
 
       <div class="guide-section">
-        <h3>Mecari, Mejaga &amp; Ngandang</h3>
+        <h3>Perbedaan Mencari vs Nyaga</h3>
         <ul>
-          <li><strong>🔍 MECARI</strong> (1 Soca di 11 kartu): Menunggu kartu yang sama persis untuk Soca ke-2.</li>
-          <li><strong>🔥 MEJAGA</strong> (≥ 2 Soca di 11 kartu): Menang dengan kartu apa saja dalam satu keluarga (<em>Kupak Nyari</em>).</li>
-          <li><strong>Ngandang</strong>: Menang saat membuka kartu kemenangan sendiri dari Tumpukan.</li>
-          <li><em>Catatan:</em> Kemenangan <strong>tidak boleh</strong> dari Ngejuk atau buangan tangan; harus dari kupakan Tumpukan.</li>
+          <li><strong>🔍 MENCARI (1 Soca + 2 Serigat/Lawang + 2 Cecarian)</strong>: Memburu 1 kartu spesifik. <strong>Sah</strong> menang baik dari <em>Ngupak</em> maupun menyambar <em>Hasil Buangan</em> lawan.</li>
+          <li><strong>🔥 NYAGA (2 Soca + 1 Serigat/Lawang + 2 Jejagan)</strong>: Menjaga susunan matang. <strong>Sah</strong> menang dari <em>Ngupak</em>, tetapi <strong>DILARANG</strong> menyambar hasil buangan untuk menang.</li>
+          <li><strong>Prioritas Ilehan</strong>: Jika &gt;1 pemain <em>Mencari</em> menunggu buangan yang sama, pemain terdekat searah putaran (<em>ilehan</em>) yang berhak menang.</li>
+        </ul>
+      </div>
+
+      <div class="guide-section">
+        <h3>Menurunkan Kartu &amp; Pelanggaran (Nongong)</h3>
+        <ul>
+          <li><strong>Set Jukjukan (Buangan)</strong>: Set yang terbentuk dari kartu buangan lawan wajib langsung diturunkan &amp; dibuka di meja.</li>
+          <li><strong>Set Ngupak &amp; Kartu Tunggu</strong>: Susunan murni dari <em>Ngupak</em> serta kartu tunggu (<em>Cecarian</em> / <em>Jejagan</em>) tetap tertutup di tangan hingga menang.</li>
+          <li><strong>Nongong (Pelanggaran)</strong>: Nyaga menyambar buangan untuk menang, klaim menang dengan 12 kartu tidak valid, atau membuang kartu Jukjukan sebelum Nyari.</li>
         </ul>
       </div>
 

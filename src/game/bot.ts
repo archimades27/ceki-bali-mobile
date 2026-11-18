@@ -1,4 +1,5 @@
 import {
+  checkWinWithCard,
   evaluateHandScore,
   findBestPartialMelds,
   getNyagaWaits,
@@ -18,7 +19,13 @@ export function decideBotDraw(
 
   const withDiscard = [...player.hand, topDiscard];
 
-  // Ngenen tidak boleh dari hasil buangan/Ngejuk, jadi bot tidak perlu Ngejuk khusus untuk menang langsung
+  // Mencari (mecari) BOLEH menyambar buangan untuk menang; Nyaga (mejaga) DILARANG
+  if (player.readyMode === 'mecari' && checkWinWithCard(player.hand, topDiscard, playStyle)) {
+    return 'ngejuk';
+  }
+  if (player.readyMode === 'mejaga') {
+    return 'stock';
+  }
 
   const difficulty = player.difficulty ?? 'balanced';
   const currentMelds = findBestPartialMelds(player.hand, playStyle).melds.length;
