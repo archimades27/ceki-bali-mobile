@@ -95,7 +95,9 @@ class CekiPortraitApp {
 
     const params = new URLSearchParams(window.location.search);
     const roomParam = params.get('room');
-    if (roomParam) {
+    if (params.get('demo') === 'nyari') {
+      this.startDemoNyariPreview();
+    } else if (roomParam) {
       this.openOnlineModal(extractRoomCode(roomParam));
     }
   }
@@ -124,6 +126,61 @@ class CekiPortraitApp {
       window.clearTimeout(this.botTimer);
       this.botTimer = null;
     }
+  }
+
+  private startDemoNyariPreview(): void {
+    this.cleanupNetwork();
+    this.mode = 'offline';
+    this.mySeat = 0;
+    const mk = (key: keyof typeof CARD_DEFS, n: number): CardInstance => ({
+      id: `demo_${key}_${n}_${Math.random().toString(36).slice(2, 6)}`,
+      key,
+      suit: CARD_DEFS[key].suit,
+      rank: CARD_DEFS[key].rank,
+      familyId: CARD_DEFS[key].familyId,
+    });
+    const players = createInitialPlayers();
+    players[0].name = 'Anda';
+    players[0].hand = [
+      mk('tong1', 1), mk('tong1', 2), mk('tong1', 3),
+      mk('tong2', 1), mk('sok2', 1), mk('ban2', 1),
+      mk('tong3', 1), mk('sok3', 1), mk('ban3', 1),
+      mk('old_thousand', 1), mk('old_thousand', 2),
+    ];
+    players[0].discards = [mk('tong5', 1), mk('sok6', 1)];
+    players[0].readyMode = 'mecari';
+    players[0].readyCards = [mk('old_thousand', 1), mk('old_thousand', 2)];
+
+    players[1].discards = [mk('ban4', 1), mk('tong7', 2)];
+    players[2].discards = [mk('sok8', 1)];
+    players[2].readyMode = 'mejaga';
+    players[2].readyCards = [mk('white_flower', 1), mk('white_flower', 2)];
+    players[2].openMelds = [{ type: 'soca', cards: [mk('ban1', 1), mk('ban1', 2), mk('ban1', 3)] }];
+
+    players[3].discards = [mk('tong9', 1), mk('sok4', 2)];
+    players[3].readyMode = 'mecari';
+    players[3].readyCards = [mk('red_flower', 1), mk('red_flower', 2)];
+
+    players[4].discards = [mk('old_thousand', 3)];
+
+    this.state = {
+      round: 1,
+      playStyle: 'nyari',
+      players,
+      currentPlayerIndex: 0,
+      phase: 'awaiting_draw',
+      botStep: null,
+      stock: [mk('tong4', 1), mk('sok5', 1), mk('ban6', 1)],
+      lastDiscardPlayerIndex: 4,
+      lastDrawnCardId: null,
+      pendingDrawnCard: null,
+      winnerId: null,
+      winningMelds: null,
+      winReason: null,
+      lastActionLog: 'Simulasi Mecari & Nyaga',
+      history: [],
+    };
+    this.render();
   }
 
   private startOfflineGame(): void {

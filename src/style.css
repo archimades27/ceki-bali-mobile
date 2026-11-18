@@ -292,12 +292,11 @@ select {
 }
 
 .nyari-banner {
-  position: absolute;
-  top: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 94%;
-  padding: 4px 12px;
+  position: relative;
+  align-self: center;
+  max-width: 96%;
+  margin-bottom: 2px;
+  padding: 3px 12px;
   background: linear-gradient(90deg, #7c1d13, #b91c1c, #7c1d13);
   border: 1.5px solid #fca5a5;
   color: #fff7ed;
@@ -808,10 +807,10 @@ select {
 .table-bottom-controls {
   position: absolute;
   bottom: 8px;
-  left: 44%;
+  left: 42%;
   transform: translateX(-50%);
   width: auto;
-  max-width: 60%;
+  max-width: 74%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -820,10 +819,10 @@ select {
 }
 
 .turn-banner-pill {
-  flex: 0 1 auto;
-  max-width: 156px;
+  flex: 0 0 auto;
+  max-width: 190px;
   text-align: center;
-  padding: 5px 10px;
+  padding: 5px 12px;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.5px;
