@@ -66,6 +66,7 @@ export interface HistoryEntry {
 export interface GameState {
   round: number;
   playStyle: PlayStyle;
+  showReadyCards?: boolean;
   players: Player[];
   currentPlayerIndex: number;
   phase: TurnPhase;

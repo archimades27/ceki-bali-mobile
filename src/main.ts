@@ -54,6 +54,7 @@ class CekiPortraitApp {
   private playerName = localStorage.getItem('ceki_player_name') || 'Pemain';
   private botDifficulty: BotDifficulty = 'balanced';
   private playStyle: PlayStyle = 'nyari';
+  private showReadyCards = localStorage.getItem('ceki_show_ready_cards') !== 'false';
 
   private state: GameState | null = null;
   private mySeat = 0;
@@ -95,8 +96,9 @@ class CekiPortraitApp {
 
     const params = new URLSearchParams(window.location.search);
     const roomParam = params.get('room');
-    if (params.get('demo') === 'nyari') {
-      this.startDemoNyariPreview();
+    const demoParam = params.get('demo');
+    if (demoParam === 'nyari' || demoParam === 'all-jaga') {
+      this.startDemoNyariPreview(demoParam === 'all-jaga');
     } else if (roomParam) {
       this.openOnlineModal(extractRoomCode(roomParam));
     }
@@ -128,7 +130,7 @@ class CekiPortraitApp {
     }
   }
 
-  private startDemoNyariPreview(): void {
+  private startDemoNyariPreview(allJaga = false): void {
     this.cleanupNetwork();
     this.mode = 'offline';
     this.mySeat = 0;
@@ -148,24 +150,39 @@ class CekiPortraitApp {
       mk('old_thousand', 1), mk('old_thousand', 2),
     ];
     players[0].discards = [mk('tong5', 1), mk('sok6', 1)];
-    players[0].readyMode = 'mecari';
+    players[0].readyMode = allJaga ? 'mejaga' : 'mecari';
     players[0].readyCards = [mk('old_thousand', 1), mk('old_thousand', 2)];
 
     players[1].discards = [mk('ban4', 1), mk('tong7', 2)];
+    if (allJaga) {
+      players[1].readyMode = 'mejaga';
+      players[1].readyCards = [mk('tong4', 1), mk('tong4', 2)];
+      players[1].openMelds = [{ type: 'lawang', cards: [mk('sok5', 1), mk('sok5', 2), mk('ban5', 1)] }];
+    }
+
     players[2].discards = [mk('sok8', 1)];
     players[2].readyMode = 'mejaga';
     players[2].readyCards = [mk('white_flower', 1), mk('white_flower', 2)];
     players[2].openMelds = [{ type: 'soca', cards: [mk('ban1', 1), mk('ban1', 2), mk('ban1', 3)] }];
 
     players[3].discards = [mk('tong9', 1), mk('sok4', 2)];
-    players[3].readyMode = 'mecari';
+    players[3].readyMode = allJaga ? 'mejaga' : 'mecari';
     players[3].readyCards = [mk('red_flower', 1), mk('red_flower', 2)];
+    if (allJaga) {
+      players[3].openMelds = [{ type: 'serigat', cards: [mk('tong6', 1), mk('sok6', 2), mk('ban6', 1)] }];
+    }
 
     players[4].discards = [mk('old_thousand', 3)];
+    if (allJaga) {
+      players[4].readyMode = 'mejaga';
+      players[4].readyCards = [mk('ban7', 1), mk('ban7', 2)];
+      players[4].openMelds = [{ type: 'soca', cards: [mk('tong8', 1), mk('tong8', 2), mk('tong8', 3)] }];
+    }
 
     this.state = {
       round: 1,
       playStyle: 'nyari',
+      showReadyCards: true,
       players,
       currentPlayerIndex: 0,
       phase: 'awaiting_draw',
@@ -177,7 +194,7 @@ class CekiPortraitApp {
       winnerId: null,
       winningMelds: null,
       winReason: null,
-      lastActionLog: 'Simulasi Mecari & Nyaga',
+      lastActionLog: allJaga ? 'Simulasi Semua Jaga' : 'Simulasi Mecari & Nyaga',
       history: [],
     };
     this.render();
@@ -194,7 +211,10 @@ class CekiPortraitApp {
     );
     players[0].name = this.playerName.trim() || 'Anda';
     players[0].avatarText = players[0].name.slice(0, 2).toUpperCase();
-    this.state = startNewRound(undefined, this.playStyle, players);
+    this.state = {
+      ...startNewRound(undefined, this.playStyle, players),
+      showReadyCards: this.showReadyCards,
+    };
     sfx.playMeldFormed();
     this.render();
     this.scheduleOfflineBotIfNeeded();
@@ -807,6 +827,19 @@ class CekiPortraitApp {
 
     row2.append(diffField, styleField);
 
+    const readyToggleLabel = document.createElement('label');
+    readyToggleLabel.className = 'startup-toggle';
+    const readyCheckbox = document.createElement('input');
+    readyCheckbox.type = 'checkbox';
+    readyCheckbox.checked = this.showReadyCards;
+    readyCheckbox.addEventListener('change', () => {
+      this.showReadyCards = readyCheckbox.checked;
+      localStorage.setItem('ceki_show_ready_cards', String(this.showReadyCards));
+    });
+    const readyToggleText = document.createElement('span');
+    readyToggleText.textContent = 'Tunjukkan kartu Carian / Jaga ke pemain lain';
+    readyToggleLabel.append(readyCheckbox, readyToggleText);
+
     const actions = document.createElement('div');
     actions.className = 'startup-actions';
 
@@ -835,7 +868,7 @@ class CekiPortraitApp {
     btnGuide.addEventListener('click', () => this.tutorialModal.open());
 
     actions.append(btnOffline, btnOnline, btnLan, btnGuide);
-    card.append(nameField, row2, actions);
+    card.append(nameField, row2, readyToggleLabel, actions);
     screen.appendChild(card);
     return screen;
   }
@@ -904,9 +937,12 @@ class CekiPortraitApp {
         parts.push(meNyari.p.readyMode === 'mejaga' ? '🔥 ANDA MEJAGA' : '🔍 ANDA MECARI');
       }
       if (oppNyari.length > 0) {
-        const names = oppNyari
-          .map(({ p }) => `${p.name} (${p.readyMode === 'mejaga' ? 'MEJAGA' : 'MECARI'})`)
-          .join(', ');
+        const names =
+          oppNyari.length <= 2
+            ? oppNyari
+                .map(({ p }) => `${p.name} (${p.readyMode === 'mejaga' ? 'Jaga' : 'Cari'})`)
+                .join(', ')
+            : `${oppNyari.length} Lawan Nyari`;
         parts.push(`⚠️ ${names}`);
       }
       const banner = document.createElement('div');
@@ -1187,57 +1223,70 @@ class CekiPortraitApp {
     const openCardsToDisplay =
       openMeldCards.length > 0 ? openMeldCards : (player.openNgejukCards ?? []);
 
-    if (openCardsToDisplay.length > 0) {
-      const jukSlot = document.createElement('div');
-      jukSlot.className = 'seat-card-slot';
-
-      const openBtn = document.createElement('button');
-      openBtn.type = 'button';
-      openBtn.className = 'seat-open-ngejuk';
-      openBtn.title = 'Ketuk untuk lihat detail kartu Jukjukan terbuka';
-      openBtn.setAttribute('aria-label', `Lihat kartu Jukjukan ${player.name}`);
-      openBtn.addEventListener('click', () =>
-        this.openDiscardInspectModal(`Jukjukan ${player.name}`, openCardsToDisplay)
-      );
-      for (const openCard of openCardsToDisplay.slice(0, 3)) {
-        const mini = renderClassicCard(openCard.key, { small: true });
-        mini.classList.add('open-ngejuk-mini');
-        openBtn.appendChild(mini);
-      }
-
-      const jukCaption = document.createElement('span');
-      jukCaption.className = 'seat-slot-caption seat-slot-caption--juk';
-      jukCaption.textContent =
-        openMeldCards.length > 0 ? `Juk (${openCardsToDisplay.length})` : 'Juk';
-      jukSlot.append(openBtn, jukCaption);
-      cardsRow.appendChild(jukSlot);
-    }
-
+    const hasJuk = openCardsToDisplay.length > 0;
     const readyCards = player.readyCards ?? [];
-    if ((player.readyMode === 'mecari' || player.readyMode === 'mejaga') && readyCards.length > 0) {
-      const readySlot = document.createElement('div');
-      readySlot.className = 'seat-card-slot';
+    const hasReady =
+      state.showReadyCards !== false &&
+      (player.readyMode === 'mecari' || player.readyMode === 'mejaga') &&
+      readyCards.length > 0;
 
-      const readyBtn = document.createElement('button');
-      readyBtn.type = 'button';
-      readyBtn.className = `seat-ready-cards is-${player.readyMode}`;
-      const label = player.readyMode === 'mecari' ? 'Carian' : 'Jaga';
-      readyBtn.title = `Ketuk untuk lihat kartu ${label} ${player.name}`;
-      readyBtn.setAttribute('aria-label', `Lihat kartu ${label} ${player.name}`);
-      readyBtn.addEventListener('click', () =>
-        this.openDiscardInspectModal(`${label} ${player.name}`, readyCards)
-      );
-      for (const rc of readyCards) {
-        const mini = renderClassicCard(rc.key, { small: true });
-        mini.classList.add('open-ngejuk-mini');
-        readyBtn.appendChild(mini);
+    if (hasJuk || hasReady) {
+      const openCol = document.createElement('div');
+      openCol.className = 'seat-open-stack';
+
+      if (hasReady) {
+        const readySlot = document.createElement('div');
+        readySlot.className = 'seat-card-slot';
+
+        const readyBtn = document.createElement('button');
+        readyBtn.type = 'button';
+        readyBtn.className = `seat-ready-cards is-${player.readyMode}`;
+        const label = player.readyMode === 'mecari' ? 'Carian' : 'Jaga';
+        readyBtn.title = `Ketuk untuk lihat kartu ${label} ${player.name}`;
+        readyBtn.setAttribute('aria-label', `Lihat kartu ${label} ${player.name}`);
+        readyBtn.addEventListener('click', () =>
+          this.openDiscardInspectModal(`${label} ${player.name}`, readyCards)
+        );
+        for (const rc of readyCards) {
+          const mini = renderClassicCard(rc.key, { small: true });
+          mini.classList.add('open-stack-card');
+          readyBtn.appendChild(mini);
+        }
+
+        const readyCaption = document.createElement('span');
+        readyCaption.className = `seat-slot-caption seat-slot-caption--${player.readyMode}`;
+        readyCaption.textContent = label;
+        readySlot.append(readyBtn, readyCaption);
+        openCol.appendChild(readySlot);
       }
 
-      const readyCaption = document.createElement('span');
-      readyCaption.className = `seat-slot-caption seat-slot-caption--${player.readyMode}`;
-      readyCaption.textContent = label;
-      readySlot.append(readyBtn, readyCaption);
-      cardsRow.appendChild(readySlot);
+      if (hasJuk) {
+        const jukSlot = document.createElement('div');
+        jukSlot.className = 'seat-card-slot';
+
+        const openBtn = document.createElement('button');
+        openBtn.type = 'button';
+        openBtn.className = 'seat-open-ngejuk';
+        openBtn.title = 'Ketuk untuk lihat detail kartu Jukjukan terbuka';
+        openBtn.setAttribute('aria-label', `Lihat kartu Jukjukan ${player.name}`);
+        openBtn.addEventListener('click', () =>
+          this.openDiscardInspectModal(`Jukjukan ${player.name}`, openCardsToDisplay)
+        );
+        for (const openCard of openCardsToDisplay.slice(0, 3)) {
+          const mini = renderClassicCard(openCard.key, { small: true });
+          mini.classList.add('open-stack-card');
+          openBtn.appendChild(mini);
+        }
+
+        const jukCaption = document.createElement('span');
+        jukCaption.className = 'seat-slot-caption seat-slot-caption--juk';
+        jukCaption.textContent =
+          openMeldCards.length > 0 ? `Juk (${openCardsToDisplay.length})` : 'Juk';
+        jukSlot.append(openBtn, jukCaption);
+        openCol.appendChild(jukSlot);
+      }
+
+      cardsRow.appendChild(openCol);
     }
 
     seat.append(namePill, cardsRow);

@@ -291,6 +291,7 @@ export class LanHostController {
         return {
           ...p,
           hand: p.hand.map((_, cIdx) => hiddenCard(cIdx, idx)),
+          readyCards: this.state.showReadyCards === false ? [] : p.readyCards,
         };
       }),
     };

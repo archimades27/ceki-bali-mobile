@@ -165,6 +165,28 @@ select {
   gap: 10px;
 }
 
+.startup-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(9, 12, 18, 0.75);
+  border: 1px solid rgba(200, 157, 66, 0.35);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-light);
+  text-align: left;
+  cursor: pointer;
+}
+
+.startup-toggle input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  min-block-size: 18px;
+  accent-color: var(--gold-bright);
+  flex-shrink: 0;
+}
+
 .startup-actions {
   display: flex;
   flex-direction: column;
@@ -320,19 +342,19 @@ select {
 
 .nyari-alert-toast {
   position: absolute;
-  top: max(54px, calc(env(safe-area-inset-top, 0px) + 46px));
+  top: max(6px, env(safe-area-inset-top, 6px));
   left: 50%;
   transform: translateX(-50%);
-  width: min(90%, 360px);
-  padding: 9px 14px;
-  border-radius: 12px;
+  width: min(92%, 370px);
+  padding: 7px 12px;
+  border-radius: 10px;
   font-size: 12px;
   font-weight: 900;
   text-align: center;
   letter-spacing: 0.4px;
   z-index: 50;
   pointer-events: none;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.85);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.9);
   animation: nyari-toast-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -489,12 +511,12 @@ select {
 }
 
 .seat-mid-left {
-  top: 34%;
+  top: 37%;
   left: 2px;
 }
 
 .seat-mid-right {
-  top: 34%;
+  top: 37%;
   right: 2px;
 }
 
@@ -630,12 +652,38 @@ select {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .seat-top-right .seat-cards-row,
 .seat-mid-right .seat-cards-row {
   flex-direction: row-reverse;
+}
+
+.seat-open-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.open-stack-card.ceki-card--small {
+  width: clamp(20px, 5.4vw, 24px);
+  max-width: 24px;
+  transition: transform 0.14s ease;
+}
+
+.seat-ready-cards .open-stack-card:not(:first-child),
+.seat-open-ngejuk .open-stack-card:not(:first-child) {
+  margin-left: -6px;
+}
+
+.seat-ready-cards:hover .open-stack-card.ceki-card--small,
+.seat-ready-cards:active .open-stack-card.ceki-card--small,
+.seat-open-ngejuk:hover .open-stack-card.ceki-card--small,
+.seat-open-ngejuk:active .open-stack-card.ceki-card--small {
+  transform: scale(1.25);
+  z-index: 20;
 }
 
 .seat-card-slot {
@@ -734,9 +782,9 @@ select {
 
 .seat-ngejuk-pill {
   position: relative;
-  margin-top: -10px;
+  margin-top: 3px;
   z-index: 12;
-  padding: 3px 10px;
+  padding: 2px 10px;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.4px;
@@ -746,7 +794,7 @@ select {
   border-radius: 999px;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7), 0 0 10px rgba(74, 222, 128, 0.65);
-  min-height: 26px;
+  min-height: 24px;
 }
 
 .seat-ngejuk-pill:active {
@@ -872,12 +920,12 @@ select {
 /* Meld Celebration Toast */
 .meld-toast {
   position: absolute;
-  top: -28px;
+  top: 2px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 4px 14px;
+  padding: 3px 12px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
   letter-spacing: 1px;
   z-index: 25;
