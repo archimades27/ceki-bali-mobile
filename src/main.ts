@@ -1156,6 +1156,33 @@ class CekiPortraitApp {
       cardsRow.appendChild(jukSlot);
     }
 
+    const readyCards = player.readyCards ?? [];
+    if ((player.readyMode === 'mecari' || player.readyMode === 'mejaga') && readyCards.length > 0) {
+      const readySlot = document.createElement('div');
+      readySlot.className = 'seat-card-slot';
+
+      const readyBtn = document.createElement('button');
+      readyBtn.type = 'button';
+      readyBtn.className = `seat-ready-cards is-${player.readyMode}`;
+      const label = player.readyMode === 'mecari' ? 'Carian' : 'Jaga';
+      readyBtn.title = `Ketuk untuk lihat kartu ${label} ${player.name}`;
+      readyBtn.setAttribute('aria-label', `Lihat kartu ${label} ${player.name}`);
+      readyBtn.addEventListener('click', () =>
+        this.openDiscardInspectModal(`${label} ${player.name}`, readyCards)
+      );
+      for (const rc of readyCards) {
+        const mini = renderClassicCard(rc.key, { small: true });
+        mini.classList.add('open-ngejuk-mini');
+        readyBtn.appendChild(mini);
+      }
+
+      const readyCaption = document.createElement('span');
+      readyCaption.className = `seat-slot-caption seat-slot-caption--${player.readyMode}`;
+      readyCaption.textContent = label;
+      readySlot.append(readyBtn, readyCaption);
+      cardsRow.appendChild(readySlot);
+    }
+
     seat.append(namePill, cardsRow);
 
     return seat;

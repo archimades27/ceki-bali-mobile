@@ -18,6 +18,17 @@ function extractOpenMeldForCard(
   return partial.melds.find((m) => m.cards.some((c) => c.id === taken.id)) ?? null;
 }
 
+function computeReadyCards(
+  hand11: CardInstance[],
+  mode: 'mecari' | 'mejaga' | null,
+  playStyle: PlayStyle
+): CardInstance[] {
+  if (!mode || hand11.length !== 11) return [];
+  const partial = findBestPartialMelds(hand11, playStyle);
+  if (partial.leftover.length === 2) return partial.leftover;
+  return partial.leftover.slice(0, 2);
+}
+
 export function createInitialPlayers(): Player[] {
   return [
     {
@@ -146,7 +157,9 @@ export function startNewRound(
   for (let i = 0; i < players.length; i++) {
     const dealt = deck.splice(0, 11);
     players[i].hand = players[i].isHuman ? sortHand(dealt) : dealt;
-    players[i].readyMode = getReadyStatus(players[i].hand, playStyle).mode;
+    const ready = getReadyStatus(players[i].hand, playStyle);
+    players[i].readyMode = ready.mode;
+    players[i].readyCards = computeReadyCards(players[i].hand, ready.mode, playStyle);
   }
 
   // Place 1 opening discard to the right of the player just before the random starter
@@ -344,6 +357,7 @@ export function ngejukDiscard(state: GameState): GameState {
       openNgejukCards: nextOpenNgejuk,
       openMelds: nextOpenMelds,
       readyMode: p.isHuman ? p.readyMode : null,
+      readyCards: p.isHuman ? (p.readyCards ?? []) : [],
       statusText: 'Ngejuk!',
     };
   });
@@ -445,6 +459,7 @@ export function acceptPendingDrawnCard(
       openNgejukCards: nextOpenNgejuk,
       openMelds: nextOpenMelds,
       readyMode: null,
+      readyCards: [],
     };
   });
   return {
@@ -621,6 +636,7 @@ export function discardCard(
         discards: [...p.discards, cardToDiscard],
         openNgejukCards: nextOpenNgejuk,
         readyMode: ready.mode,
+        readyCards: computeReadyCards(nextHand, ready.mode, state.playStyle),
         statusText:
           ready.mode === 'mejaga'
             ? 'Mejaga!'

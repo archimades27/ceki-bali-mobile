@@ -661,6 +661,44 @@ select {
   border: 1px solid rgba(251, 191, 36, 0.45);
 }
 
+.seat-slot-caption--mecari {
+  color: #fde68a;
+  border: 1px solid rgba(245, 158, 11, 0.55);
+}
+
+.seat-slot-caption--mejaga {
+  color: #fecaca;
+  border: 1px solid rgba(239, 68, 68, 0.65);
+}
+
+.seat-ready-cards {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 2px 4px;
+  background: rgba(11, 14, 20, 0.92);
+  border-radius: 6px;
+  cursor: pointer;
+  min-height: 36px;
+}
+
+.seat-ready-cards.is-mecari {
+  border: 1.5px solid #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.55);
+}
+
+.seat-ready-cards.is-mejaga {
+  border: 1.5px solid #ef4444;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.65);
+}
+
+.seat-ready-cards:hover .open-ngejuk-mini.ceki-card--small,
+.seat-ready-cards:active .open-ngejuk-mini.ceki-card--small {
+  transform: scale(1.25);
+  z-index: 20;
+}
+
 .seat-discard-btn {
   position: relative;
   display: inline-flex;
