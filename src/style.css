@@ -501,7 +501,7 @@ select {
 
 .my-table-discard {
   position: absolute;
-  bottom: 48px;
+  bottom: 2px;
   right: 4px;
   display: flex;
   flex-direction: column;
@@ -769,11 +769,11 @@ select {
 /* Inside Bottom of Table: GILIRAN ANDA + Susun */
 .table-bottom-controls {
   position: absolute;
-  bottom: 10px;
-  left: 50%;
+  bottom: 8px;
+  left: 44%;
   transform: translateX(-50%);
   width: auto;
-  max-width: 64%;
+  max-width: 60%;
   display: flex;
   align-items: center;
   justify-content: center;
