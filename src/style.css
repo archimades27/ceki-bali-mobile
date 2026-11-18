@@ -441,39 +441,40 @@ select {
 
 .stock-btn {
   position: relative;
-  width: 54px;
+  width: clamp(68px, 18vw, 80px);
   aspect-ratio: 120 / 259;
   padding: 0;
-  border: 1.5px solid #e6d5b8;
-  border-radius: 3px;
+  border: 2px solid #e6d5b8;
+  border-radius: 4px;
   background: url('./assets/card-back.jpg') center / cover no-repeat;
   cursor: pointer;
   box-shadow:
     0 2px 0 #d6cbb5,
-    0 4px 0 #b3a48b,
-    0 6px 0 #8d7f68,
-    0 10px 18px rgba(0, 0, 0, 0.75);
+    0 5px 0 #b3a48b,
+    0 8px 0 #8d7f68,
+    0 12px 22px rgba(0, 0, 0, 0.8);
 }
 
 .stock-btn.is-active-draw {
   border-color: var(--gold-bright);
   box-shadow:
     0 2px 0 #d6cbb5,
-    0 4px 0 #b3a48b,
-    0 0 16px rgba(247, 215, 116, 0.85);
+    0 5px 0 #b3a48b,
+    0 8px 0 #8d7f68,
+    0 0 20px rgba(247, 215, 116, 0.9);
 }
 
 .stock-count-badge {
   position: absolute;
-  top: -8px;
+  top: -10px;
   right: -10px;
-  min-width: 26px;
-  height: 26px;
-  padding: 0 5px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   color: var(--text-light);
   background: #141720;
@@ -1225,51 +1226,85 @@ select {
   pointer-events: none;
 }
 
-/* Meld Indicators: Soca = Petir, Lawang = Api, Serigat = Neon */
+/* Meld Indicators: Soca = Sengatan Petir, Lawang = Lidah Api, Serigat = Neon */
 .ceki-card.meld-type-soca {
-  box-shadow:
-    0 0 10px rgba(56, 189, 248, 0.95),
-    0 0 18px rgba(139, 92, 246, 0.7),
-    inset 0 0 0 2px #7dd3fc;
-  animation: aura-petir 1.5s steps(4, end) infinite;
+  box-shadow: inset 0 0 0 2px #7dd3fc, 0 0 8px rgba(56, 189, 248, 0.85);
 }
 
-@keyframes aura-petir {
-  0%, 70%, 100% {
-    box-shadow:
-      0 0 8px rgba(56, 189, 248, 0.8),
-      0 0 14px rgba(99, 102, 241, 0.55),
-      inset 0 0 0 2px #38bdf8;
-  }
-  20%, 50% {
-    box-shadow:
-      0 0 18px rgba(224, 242, 254, 1),
-      0 -4px 22px rgba(56, 189, 248, 0.95),
-      inset 0 0 0 2px #e0f2fe;
-  }
+.ceki-card.meld-type-soca::before,
+.ceki-card.meld-type-soca::after {
+  content: '';
+  position: absolute;
+  inset: -6px -3px;
+  pointer-events: none;
+  z-index: 16;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.ceki-card.meld-type-soca::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 120'%3E%3Cpolyline points='10,4 24,22 14,34 30,56 18,74 34,98 22,116' fill='none' stroke='%23e0f2fe' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='10,4 24,22 14,34 30,56 18,74 34,98 22,116' fill='none' stroke='%2338bdf8' stroke-width='5' opacity='0.55' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  animation: electric-zap-a 0.55s steps(3, end) infinite;
+}
+
+.ceki-card.meld-type-soca::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 120'%3E%3Cpolyline points='48,6 34,28 46,42 28,68 44,86 30,114' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='48,6 34,28 46,42 28,68 44,86 30,114' fill='none' stroke='%23818cf8' stroke-width='4.5' opacity='0.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  animation: electric-zap-b 0.42s steps(2, end) infinite;
+}
+
+@keyframes electric-zap-a {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  33% { opacity: 0.25; transform: translate(-1.5px, 1px) scale(1.03); }
+  66% { opacity: 0.95; transform: translate(1.5px, -1px) scale(0.98); }
+  100% { opacity: 0.4; transform: translate(0, 0) scale(1.02); }
+}
+
+@keyframes electric-zap-b {
+  0% { opacity: 0.2; transform: translate(1px, -1px); }
+  50% { opacity: 1; transform: translate(-1.5px, 1.5px) scaleY(1.05); }
+  100% { opacity: 0.35; transform: translate(0, 0); }
 }
 
 .ceki-card.meld-type-lawang {
-  box-shadow:
-    0 0 10px rgba(255, 87, 34, 0.9),
-    0 0 18px rgba(251, 146, 60, 0.65),
-    inset 0 0 0 2px #ff6d00;
-  animation: aura-api 1.4s ease-in-out infinite alternate;
+  box-shadow: inset 0 0 0 2px #ff6d00, 0 0 10px rgba(255, 87, 34, 0.85);
 }
 
-@keyframes aura-api {
-  0% {
-    box-shadow:
-      0 0 8px rgba(255, 69, 0, 0.85),
-      0 0 14px rgba(251, 191, 36, 0.5),
-      inset 0 0 0 2px #ff5722;
-  }
-  100% {
-    box-shadow:
-      0 0 15px rgba(255, 115, 0, 1),
-      0 -4px 18px rgba(251, 191, 36, 0.8),
-      inset 0 0 0 2px #fbbf24;
-  }
+.ceki-card.meld-type-lawang::before,
+.ceki-card.meld-type-lawang::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  top: -18px;
+  height: 28px;
+  pointer-events: none;
+  z-index: 16;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  transform-origin: bottom center;
+}
+
+.ceki-card.meld-type-lawang::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 36'%3E%3Cpath d='M4,36 C6,22 12,18 10,8 C16,14 20,20 22,30 C24,18 28,8 32,2 C34,12 38,18 40,28 C44,18 48,10 52,6 C54,16 56,24 56,36 Z' fill='%23ff4500' opacity='0.92'/%3E%3C/svg%3E");
+  animation: flame-lick-a 0.7s ease-in-out infinite alternate;
+}
+
+.ceki-card.meld-type-lawang::after {
+  top: -14px;
+  height: 22px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 32'%3E%3Cpath d='M10,32 C12,20 16,14 18,8 C20,16 24,20 26,28 C28,18 30,10 34,4 C36,14 40,18 42,28 C44,20 46,14 49,10 C51,18 52,24 52,32 Z' fill='%23fde047' opacity='0.95'/%3E%3C/svg%3E");
+  animation: flame-lick-b 0.55s ease-in-out infinite alternate;
+}
+
+@keyframes flame-lick-a {
+  0% { transform: scaleY(0.92) skewX(-4deg) translateY(1px); opacity: 0.9; }
+  50% { transform: scaleY(1.12) skewX(4deg) translateY(-2px); opacity: 1; }
+  100% { transform: scaleY(0.98) skewX(-2deg) translateY(0); opacity: 0.95; }
+}
+
+@keyframes flame-lick-b {
+  0% { transform: scaleY(1.08) skewX(5deg) translateY(-1px); opacity: 0.85; }
+  100% { transform: scaleY(0.88) skewX(-5deg) translateY(2px); opacity: 1; }
 }
 
 .ceki-card.meld-type-serigat {
