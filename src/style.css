@@ -490,12 +490,12 @@ select {
 }
 
 .seat-mid-left {
-  top: 41%;
+  top: 34%;
   left: 2px;
 }
 
 .seat-mid-right {
-  top: 41%;
+  top: 34%;
   right: 2px;
 }
 
@@ -688,11 +688,11 @@ select {
 }
 
 .seat-discard-btn.is-ngejuk-ready .ceki-card--small {
-  width: clamp(50px, 14vw, 60px);
-  max-width: 60px;
+  width: clamp(44px, 12vw, 54px);
+  max-width: 54px;
   outline: 2px solid #4ade80;
   box-shadow: 0 0 18px rgba(74, 222, 128, 0.9);
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 .seat-ngejuk-pill {

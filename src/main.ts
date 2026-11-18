@@ -1110,10 +1110,22 @@ class CekiPortraitApp {
       discardBtn.appendChild(empty);
     }
 
-    const discardCaption = document.createElement('span');
-    discardCaption.className = 'seat-slot-caption';
-    discardCaption.textContent = 'Buangan';
-    discardSlot.append(discardBtn, discardCaption);
+    if (isNgejukSource && topDiscard) {
+      const quickNgejuk = document.createElement('button');
+      quickNgejuk.type = 'button';
+      quickNgejuk.className = 'seat-ngejuk-pill';
+      quickNgejuk.textContent = 'Ngejuk!';
+      quickNgejuk.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.dispatchAction({ type: 'ngejuk' });
+      });
+      discardSlot.append(discardBtn, quickNgejuk);
+    } else {
+      const discardCaption = document.createElement('span');
+      discardCaption.className = 'seat-slot-caption';
+      discardCaption.textContent = 'Buangan';
+      discardSlot.append(discardBtn, discardCaption);
+    }
     cardsRow.appendChild(discardSlot);
 
     if ((player.openNgejukCards?.length ?? 0) > 0) {
@@ -1142,18 +1154,6 @@ class CekiPortraitApp {
     }
 
     seat.append(namePill, cardsRow);
-
-    if (isNgejukSource && topDiscard) {
-      const quickNgejuk = document.createElement('button');
-      quickNgejuk.type = 'button';
-      quickNgejuk.className = 'seat-ngejuk-pill';
-      quickNgejuk.textContent = 'Ngejuk!';
-      quickNgejuk.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.dispatchAction({ type: 'ngejuk' });
-      });
-      seat.appendChild(quickNgejuk);
-    }
 
     return seat;
   }
