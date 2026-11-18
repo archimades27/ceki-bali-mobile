@@ -1345,10 +1345,10 @@ class CekiPortraitApp {
       toast.className = `meld-toast meld-toast--${toastType}`;
       toast.textContent =
         toastType === 'soca'
-          ? '🔥 SOCA!'
+          ? '⚡ SOCA!'
           : toastType === 'lawang'
-            ? '⚡ LAWANG!'
-            : '🌬️ SERIGAT!';
+            ? '🔥 LAWANG!'
+            : '✦ SERIGAT!';
       zone.appendChild(toast);
     }
 
