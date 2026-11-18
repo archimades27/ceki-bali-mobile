@@ -1235,20 +1235,20 @@ select {
 .ceki-card.meld-type-soca::after {
   content: '';
   position: absolute;
-  inset: -6px -3px;
+  inset: -8px -5px;
   pointer-events: none;
-  z-index: 16;
+  z-index: 14;
   background-repeat: no-repeat;
   background-size: 100% 100%;
 }
 
 .ceki-card.meld-type-soca::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 120'%3E%3Cpolyline points='10,4 24,22 14,34 30,56 18,74 34,98 22,116' fill='none' stroke='%23e0f2fe' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='10,4 24,22 14,34 30,56 18,74 34,98 22,116' fill='none' stroke='%2338bdf8' stroke-width='5' opacity='0.55' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 120'%3E%3Cpolyline points='3,6 8,24 2,42 7,64 2,86 7,108 3,116' fill='none' stroke='%23e0f2fe' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='3,6 8,24 2,42 7,64 2,86 7,108 3,116' fill='none' stroke='%2338bdf8' stroke-width='4.5' opacity='0.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='10,3 24,7 36,2 50,6' fill='none' stroke='%23e0f2fe' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   animation: electric-zap-a 0.55s steps(3, end) infinite;
 }
 
 .ceki-card.meld-type-soca::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 120'%3E%3Cpolyline points='48,6 34,28 46,42 28,68 44,86 30,114' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='48,6 34,28 46,42 28,68 44,86 30,114' fill='none' stroke='%23818cf8' stroke-width='4.5' opacity='0.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 120'%3E%3Cpolyline points='57,8 52,28 58,48 53,72 58,94 53,114' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='57,8 52,28 58,48 53,72 58,94 53,114' fill='none' stroke='%23818cf8' stroke-width='4.5' opacity='0.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='12,117 28,113 44,118 54,114' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   animation: electric-zap-b 0.42s steps(2, end) infinite;
 }
 
@@ -1275,10 +1275,10 @@ select {
   position: absolute;
   left: -4px;
   right: -4px;
-  top: -18px;
-  height: 28px;
+  top: -19px;
+  height: 19px;
   pointer-events: none;
-  z-index: 16;
+  z-index: 14;
   background-repeat: no-repeat;
   background-size: 100% 100%;
   transform-origin: bottom center;
@@ -1290,8 +1290,8 @@ select {
 }
 
 .ceki-card.meld-type-lawang::after {
-  top: -14px;
-  height: 22px;
+  top: -15px;
+  height: 15px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 32'%3E%3Cpath d='M10,32 C12,20 16,14 18,8 C20,16 24,20 26,28 C28,18 30,10 34,4 C36,14 40,18 42,28 C44,20 46,14 49,10 C51,18 52,24 52,32 Z' fill='%23fde047' opacity='0.95'/%3E%3C/svg%3E");
   animation: flame-lick-b 0.55s ease-in-out infinite alternate;
 }
@@ -1309,24 +1309,57 @@ select {
 
 .ceki-card.meld-type-serigat {
   box-shadow:
-    0 0 9px #00f5d4,
-    0 0 18px rgba(0, 245, 212, 0.7),
-    inset 0 0 0 2px #67e8f9;
+    0 0 5px #00f5d4,
+    inset 0 0 0 2px #00f5d4;
   animation: aura-neon 2s ease-in-out infinite;
 }
 
 @keyframes aura-neon {
   0%, 100% {
     box-shadow:
-      0 0 8px #00f5d4,
-      0 0 16px rgba(0, 245, 212, 0.72),
-      inset 0 0 0 2px #67e8f9;
+      0 0 4px #00f5d4,
+      inset 0 0 0 2px #22d3ee;
   }
   50% {
     box-shadow:
-      0 0 13px #22d3ee,
-      0 0 22px rgba(52, 211, 153, 0.78),
-      inset 0 0 0 2px #cffafe;
+      0 0 7px #67e8f9,
+      inset 0 0 0 2px #a7f3d0;
+  }
+}
+
+@media (max-height: 740px) {
+  .seat-mid-left,
+  .seat-mid-right {
+    top: 44%;
+  }
+  .open-stack-card.ceki-card--small {
+    width: 17px;
+    max-width: 17px;
+  }
+  .seat-discard-btn .ceki-card--small {
+    width: 28px;
+    max-width: 28px;
+  }
+  .seat-discard-btn.is-ngejuk-ready .ceki-card--small {
+    width: 34px;
+    max-width: 34px;
+  }
+  .stock-btn {
+    width: 58px;
+  }
+  .my-table-discard {
+    bottom: 0;
+  }
+  .my-table-discard .ceki-card--small {
+    width: 24px;
+    max-width: 24px;
+  }
+  .hand-cards-row {
+    min-height: 98px;
+    padding: 14px 10px 4px;
+  }
+  .ceki-card {
+    width: clamp(38px, 10.6vw, 44px);
   }
 }
 
