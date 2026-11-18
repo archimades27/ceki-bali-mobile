@@ -67,6 +67,7 @@ export interface GameState {
   round: number;
   playStyle: PlayStyle;
   showReadyCards?: boolean;
+  nyagaMustNgupak?: boolean;
   players: Player[];
   currentPlayerIndex: number;
   phase: TurnPhase;

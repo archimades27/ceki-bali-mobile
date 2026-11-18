@@ -13,17 +13,21 @@ import type { CardInstance, GameState, Player, PlayStyle } from './types.ts';
 export function decideBotDraw(
   player: Player,
   topDiscard: CardInstance | undefined,
-  playStyle: PlayStyle = 'nyari'
+  playStyle: PlayStyle = 'nyari',
+  nyagaMustNgupak = true
 ): 'ngejuk' | 'stock' {
   if (!topDiscard) return 'stock';
 
   const withDiscard = [...player.hand, topDiscard];
 
-  // Mencari (mecari) BOLEH menyambar buangan untuk menang; Nyaga (mejaga) DILARANG
-  if (player.readyMode === 'mecari' && checkWinWithCard(player.hand, topDiscard, playStyle)) {
+  // Mencari (mecari) BOLEH menyambar buangan untuk menang; Nyaga (mejaga) sesuai opsi nyagaMustNgupak
+  if (
+    (player.readyMode === 'mecari' || (!nyagaMustNgupak && player.readyMode === 'mejaga')) &&
+    checkWinWithCard(player.hand, topDiscard, playStyle)
+  ) {
     return 'ngejuk';
   }
-  if (player.readyMode === 'mejaga') {
+  if (player.readyMode === 'mejaga' && nyagaMustNgupak) {
     return 'stock';
   }
 

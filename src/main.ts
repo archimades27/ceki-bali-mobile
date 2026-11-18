@@ -55,6 +55,7 @@ class CekiPortraitApp {
   private botDifficulty: BotDifficulty = 'balanced';
   private playStyle: PlayStyle = 'nyari';
   private showReadyCards = localStorage.getItem('ceki_show_ready_cards') !== 'false';
+  private nyagaMustNgupak = localStorage.getItem('ceki_nyaga_must_ngupak') !== 'false';
 
   private state: GameState | null = null;
   private mySeat = 0;
@@ -214,6 +215,7 @@ class CekiPortraitApp {
     this.state = {
       ...startNewRound(undefined, this.playStyle, players),
       showReadyCards: this.showReadyCards,
+      nyagaMustNgupak: this.nyagaMustNgupak,
     };
     sfx.playMeldFormed();
     this.render();
@@ -360,7 +362,12 @@ class CekiPortraitApp {
 
       if (this.state.phase === 'bot_thinking' && this.state.botStep === 'draw') {
         const ngejukTarget = getNgejukTarget(this.state);
-        const choice = decideBotDraw(bot, ngejukTarget?.card, this.state.playStyle);
+        const choice = decideBotDraw(
+          bot,
+          ngejukTarget?.card,
+          this.state.playStyle,
+          this.state.nyagaMustNgupak !== false
+        );
         this.state = choice === 'ngejuk' && ngejukTarget ? ngejukDiscard(this.state) : drawFromStock(this.state);
         this.render();
         this.scheduleOfflineBotIfNeeded();
@@ -790,9 +797,6 @@ class CekiPortraitApp {
     });
     nameField.appendChild(nameInput);
 
-    const row2 = document.createElement('div');
-    row2.className = 'startup-row-2';
-
     const diffField = document.createElement('div');
     diffField.className = 'startup-field';
     diffField.innerHTML = `<label for="bot-diff-select">Level Bot</label>`;
@@ -809,36 +813,40 @@ class CekiPortraitApp {
     });
     diffField.appendChild(diffSelect);
 
-    const styleField = document.createElement('div');
-    styleField.className = 'startup-field';
-    styleField.innerHTML = `<label for="play-style-select">Gaya Main</label>`;
-    const styleSelect = document.createElement('select');
-    styleSelect.id = 'play-style-select';
-    styleSelect.innerHTML = `
-      <option value="nyari">Nyari (Bebas)</option>
-      <option value="soca">Prioritas Soca</option>
-      <option value="serigat">Prioritas Serigat</option>
-    `;
-    styleSelect.value = this.playStyle;
-    styleSelect.addEventListener('change', () => {
-      this.playStyle = styleSelect.value as PlayStyle;
-    });
-    styleField.appendChild(styleSelect);
+    const topFieldsRow = document.createElement('div');
+    topFieldsRow.className = 'startup-row-2';
+    topFieldsRow.append(nameField, diffField);
 
-    row2.append(diffField, styleField);
+    const optGrid = document.createElement('div');
+    optGrid.className = 'startup-opt-grid';
 
-    const readyToggleLabel = document.createElement('label');
-    readyToggleLabel.className = 'startup-toggle';
-    const readyCheckbox = document.createElement('input');
-    readyCheckbox.type = 'checkbox';
-    readyCheckbox.checked = this.showReadyCards;
-    readyCheckbox.addEventListener('change', () => {
-      this.showReadyCards = readyCheckbox.checked;
+    const readyOptBtn = document.createElement('button');
+    readyOptBtn.type = 'button';
+    readyOptBtn.className = `startup-opt-card ${this.showReadyCards ? 'is-active' : ''}`;
+    readyOptBtn.innerHTML = `<span class="startup-opt-label">KARTU TUNGGU (CARI/NYAGA)</span><strong class="startup-opt-val">${this.showReadyCards ? 'Terbuka (Dilihat Semua)' : 'Tertutup (Rahasia)'}</strong>`;
+    readyOptBtn.addEventListener('click', () => {
+      this.showReadyCards = !this.showReadyCards;
       localStorage.setItem('ceki_show_ready_cards', String(this.showReadyCards));
+      readyOptBtn.classList.toggle('is-active', this.showReadyCards);
+      readyOptBtn.querySelector('.startup-opt-val')!.textContent = this.showReadyCards
+        ? 'Terbuka (Dilihat Semua)'
+        : 'Tertutup (Rahasia)';
     });
-    const readyToggleText = document.createElement('span');
-    readyToggleText.textContent = 'Tunjukkan kartu Carian / Jaga ke pemain lain';
-    readyToggleLabel.append(readyCheckbox, readyToggleText);
+
+    const nyagaOptBtn = document.createElement('button');
+    nyagaOptBtn.type = 'button';
+    nyagaOptBtn.className = `startup-opt-card ${this.nyagaMustNgupak ? 'is-active' : ''}`;
+    nyagaOptBtn.innerHTML = `<span class="startup-opt-label">MENANG NYAGA</span><strong class="startup-opt-val">${this.nyagaMustNgupak ? 'Wajib Ngupak Sendiri' : 'Boleh Sambar Buangan'}</strong>`;
+    nyagaOptBtn.addEventListener('click', () => {
+      this.nyagaMustNgupak = !this.nyagaMustNgupak;
+      localStorage.setItem('ceki_nyaga_must_ngupak', String(this.nyagaMustNgupak));
+      nyagaOptBtn.classList.toggle('is-active', this.nyagaMustNgupak);
+      nyagaOptBtn.querySelector('.startup-opt-val')!.textContent = this.nyagaMustNgupak
+        ? 'Wajib Ngupak Sendiri'
+        : 'Boleh Sambar Buangan';
+    });
+
+    optGrid.append(readyOptBtn, nyagaOptBtn);
 
     const actions = document.createElement('div');
     actions.className = 'startup-actions';
@@ -868,7 +876,7 @@ class CekiPortraitApp {
     btnGuide.addEventListener('click', () => this.tutorialModal.open());
 
     actions.append(btnOffline, btnOnline, btnLan, btnGuide);
-    card.append(nameField, row2, readyToggleLabel, actions);
+    card.append(topFieldsRow, optGrid, actions);
     screen.appendChild(card);
     return screen;
   }
@@ -1545,7 +1553,9 @@ class CekiPortraitApp {
       : me.hand;
     const readyBefore = getReadyStatus(me.hand, state.playStyle);
     const allowFromSource =
-      state.lastDrawSource !== 'ngejuk' || readyBefore.mode === 'mecari';
+      state.lastDrawSource !== 'ngejuk' ||
+      readyBefore.mode === 'mecari' ||
+      (state.nyagaMustNgupak === false && readyBefore.mode === 'mejaga');
     const canCeki =
       isMyTurn &&
       state.phase === 'awaiting_discard' &&
@@ -1578,7 +1588,10 @@ class CekiPortraitApp {
     cekiBtn.className = 'btn-thumb btn-thumb--ceki';
     cekiBtn.disabled = !canCeki;
     const nyagaBlocked =
-      isMyTurn && state.lastDrawSource === 'ngejuk' && readyBefore.mode === 'mejaga';
+      isMyTurn &&
+      state.lastDrawSource === 'ngejuk' &&
+      readyBefore.mode === 'mejaga' &&
+      state.nyagaMustNgupak !== false;
     cekiBtn.innerHTML = `Ceki!<small>${canCeki ? 'MENANG!' : nyagaBlocked ? 'Wajib Ngupak' : 'Belum'}</small>`;
     cekiBtn.addEventListener('click', () => this.dispatchAction({ type: 'declare_ceki' }));
 

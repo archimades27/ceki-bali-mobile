@@ -698,7 +698,10 @@ export function discardCard(
   for (let offset = 1; offset < updatedPlayers.length; offset++) {
     const idx = (playerIdx + offset) % updatedPlayers.length;
     const candidate = updatedPlayers[idx];
-    if (candidate.readyMode !== 'mecari') continue;
+    const allowCandidate =
+      candidate.readyMode === 'mecari' ||
+      (state.nyagaMustNgupak === false && candidate.readyMode === 'mejaga');
+    if (!allowCandidate) continue;
     const winRes = checkWinWithCard(candidate.hand, cardToDiscard, state.playStyle);
     if (!winRes) continue;
 
@@ -785,8 +788,11 @@ export function declareCeki(state: GameState, playerIndex = state.currentPlayerI
 
   // Aturan Mencari vs Nyaga:
   // - Mencari (mecari): SAH menang dari hasil buangan (Ngejuk) maupun Ngupak.
-  // - Nyaga (mejaga): DILARANG menang dari hasil buangan (Ngejuk); wajib dari Ngupak sendiri.
-  if (state.lastDrawSource === 'ngejuk' && readyBeforeMode !== 'mecari') {
+  // - Nyaga (mejaga): Jika nyagaMustNgupak !== false, DILARANG menang dari buangan; wajib Ngupak.
+  const canWinFromNgejuk =
+    readyBeforeMode === 'mecari' ||
+    (state.nyagaMustNgupak === false && readyBeforeMode === 'mejaga');
+  if (state.lastDrawSource === 'ngejuk' && !canWinFromNgejuk) {
     return state;
   }
   if (!melds) return state;

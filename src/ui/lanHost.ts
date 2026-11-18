@@ -592,7 +592,12 @@ export class LanHostController {
         const bot = this.state.players[this.state.currentPlayerIndex];
         if (!bot || bot.isHuman || this.state.botStep !== 'draw') return;
         const target = getNgejukTarget(this.state);
-        const choice = decideBotDraw(bot, target?.card, this.state.playStyle);
+        const choice = decideBotDraw(
+          bot,
+          target?.card,
+          this.state.playStyle,
+          this.state.nyagaMustNgupak !== false
+        );
         const actionType = choice === 'ngejuk' && target ? 'ngejuk' : 'draw_stock';
         this.state =
           actionType === 'ngejuk' ? ngejukDiscard(this.state) : drawFromStock(this.state);
