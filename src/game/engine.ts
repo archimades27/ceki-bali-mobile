@@ -18,6 +18,11 @@ function extractOpenMeldForCard(
   return partial.melds.find((m) => m.cards.some((c) => c.id === taken.id)) ?? null;
 }
 
+function sortByMeldPriority(cards: CardInstance[], playStyle: PlayStyle): CardInstance[] {
+  const grouped = findBestPartialMelds(cards, playStyle);
+  return [...grouped.melds.flatMap((m) => m.cards), ...grouped.leftover];
+}
+
 function computeReadyCards(
   hand11: CardInstance[],
   mode: 'mecari' | 'mejaga' | null,
@@ -156,7 +161,7 @@ export function startNewRound(
   // Deal 11 cards to each of the 5 players (55 cards)
   for (let i = 0; i < players.length; i++) {
     const dealt = deck.splice(0, 11);
-    players[i].hand = players[i].isHuman ? sortHand(dealt) : dealt;
+    players[i].hand = players[i].isHuman ? sortByMeldPriority(dealt, playStyle) : dealt;
     const ready = getReadyStatus(players[i].hand, playStyle);
     players[i].readyMode = ready.mode;
     players[i].readyCards = computeReadyCards(players[i].hand, ready.mode, playStyle);
@@ -441,7 +446,9 @@ export function acceptPendingDrawnCard(
   const drawn = state.pendingDrawnCard;
   const updatedPlayers = state.players.map((p, idx) => {
     if (idx !== activeIdx) return p;
-    const nextHand = preserveHumanOrder ? [...p.hand, drawn] : sortHand([...p.hand, drawn]);
+    const nextHand = preserveHumanOrder
+      ? [...p.hand, drawn]
+      : sortByMeldPriority([...p.hand, drawn], state.playStyle);
     const nextOpenNgejuk =
       state.lastDrawSource === 'ngejuk'
         ? [...(p.openNgejukCards ?? []), drawn]
@@ -584,9 +591,7 @@ export function reorderHumanHand(
 export function sortHumanHand(state: GameState, playerIndex = 0): GameState {
   const updatedPlayers = state.players.map((p, idx) => {
     if (idx !== playerIndex) return p;
-    const grouped = findBestPartialMelds(p.hand, state.playStyle);
-    const ordered = [...grouped.melds.flatMap((m) => m.cards), ...grouped.leftover];
-    return { ...p, hand: ordered };
+    return { ...p, hand: sortByMeldPriority(p.hand, state.playStyle) };
   });
   return {
     ...state,
