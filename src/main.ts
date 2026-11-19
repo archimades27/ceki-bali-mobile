@@ -347,9 +347,9 @@ class CekiPortraitApp {
         sfx.playDiscard();
         return discardCard(prev, action.cardId, true);
       case 'reorder':
-        return reorderHumanHand(prev, action.fromIndex, action.toIndex, 0);
+        return reorderHumanHand(prev, action.fromIndex, action.toIndex, this.mySeat);
       case 'sort_hand':
-        return sortHumanHand(prev, 0);
+        return sortHumanHand(prev, this.mySeat);
       case 'declare_ceki': {
         const next = declareCeki(prev, this.mySeat);
         if (next.phase === 'round_over') sfx.playCekiWin();
@@ -1477,6 +1477,7 @@ class CekiPortraitApp {
     let startX = 0;
     let startY = 0;
     let dragging = false;
+    let holdTimer: number | null = null;
 
     cardEl.addEventListener('pointerdown', (e) => {
       startX = e.clientX;
@@ -1484,7 +1485,11 @@ class CekiPortraitApp {
       dragging = false;
       this.dragFromIndex = index;
       this.dragHoverIndex = index;
-      cardEl.classList.add('is-pressed');
+      holdTimer = window.setTimeout(() => {
+        if (this.dragFromIndex === index) {
+          cardEl.classList.add('is-pressed');
+        }
+      }, 140);
       cardEl.setPointerCapture(e.pointerId);
     });
 
@@ -1494,6 +1499,10 @@ class CekiPortraitApp {
       const dy = Math.abs(e.clientY - startY);
       if (!dragging && (dx > 10 || dy > 10)) {
         dragging = true;
+        if (holdTimer !== null) {
+          window.clearTimeout(holdTimer);
+          holdTimer = null;
+        }
         cardEl.classList.add('is-dragging');
       }
       if (!dragging) return;
@@ -1513,6 +1522,10 @@ class CekiPortraitApp {
     });
 
     const finishPointer = (e: PointerEvent) => {
+      if (holdTimer !== null) {
+        window.clearTimeout(holdTimer);
+        holdTimer = null;
+      }
       if (this.dragFromIndex !== index) return;
       if (cardEl.hasPointerCapture(e.pointerId)) {
         cardEl.releasePointerCapture(e.pointerId);

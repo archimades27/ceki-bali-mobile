@@ -131,6 +131,9 @@ const MELD_PRIORITY: Record<MeldType, number> = {
   serigat: 2,
 };
 
+const partialMeldsCache = new Map<string, { melds: Meld[]; leftover: CardInstance[] }>();
+const readyStatusCache = new Map<string, { mode: ReadyMode; waits: CardKey[] }>();
+
 export function findBestPartialMelds(
   cards: CardInstance[],
   playStyle: PlayStyle = 'nyari'
@@ -139,16 +142,38 @@ export function findBestPartialMelds(
   leftover: CardInstance[];
 } {
   const sorted = sortHand(cards);
+  const cacheKey = `${playStyle}:${sorted.map((c) => c.key).join(',')}`;
+  const cached = partialMeldsCache.get(cacheKey);
+  if (cached) {
+    // Re-bind to the caller's actual CardInstance ids in `sorted`
+    const pool = [...sorted];
+    const takeByKey = (key: CardKey): CardInstance | undefined => {
+      const idx = pool.findIndex((c) => c.key === key);
+      return idx >= 0 ? pool.splice(idx, 1)[0] : undefined;
+    };
+    const melds: Meld[] = cached.melds.map((m) => ({
+      type: m.type,
+      cards: m.cards.map((c) => takeByKey(c.key)!).filter(Boolean),
+    }));
+    const leftover = cached.leftover.map((c) => takeByKey(c.key)!).filter(Boolean);
+    if (melds.every((m, i) => m.cards.length === cached.melds[i].cards.length)) {
+      return { melds, leftover };
+    }
+  }
+
   const res = solvePartial(sorted, playStyle);
   const orderedMelds = [...res.melds].sort((a, b) => {
     const pDiff = MELD_PRIORITY[a.type] - MELD_PRIORITY[b.type];
     if (pDiff !== 0) return pDiff;
     return (a.cards[0]?.familyId ?? 0) - (b.cards[0]?.familyId ?? 0);
   });
-  return {
+  const result = {
     melds: orderedMelds,
     leftover: sortHand(res.leftover),
   };
+  if (partialMeldsCache.size > 200) partialMeldsCache.clear();
+  partialMeldsCache.set(cacheKey, result);
+  return result;
 }
 
 function scoreMeldsForStyle(melds: Meld[], playStyle: PlayStyle): number {
@@ -271,10 +296,16 @@ export function getReadyStatus(
 ): { mode: ReadyMode; waits: CardKey[] } {
   if (hand11.length !== 11) return { mode: null, waits: [] };
 
+  const cacheKey = `${playStyle}:${sortHand(hand11).map((c) => c.key).join(',')}`;
+  const cached = readyStatusCache.get(cacheKey);
+  if (cached) return cached;
+
   const socaCountIn11 = findBestPartialMelds(hand11, 'soca')
     .melds.filter((m) => m.type === 'soca').length;
   if (socaCountIn11 < 1) {
-    return { mode: null, waits: [] };
+    const empty = { mode: null, waits: [] };
+    readyStatusCache.set(cacheKey, empty);
+    return empty;
   }
 
   const exactWaits: CardKey[] = [];
@@ -294,17 +325,22 @@ export function getReadyStatus(
   }
 
   if (exactWaits.length === 0) {
-    return { mode: null, waits: [] };
+    const empty = { mode: null, waits: [] };
+    readyStatusCache.set(cacheKey, empty);
+    return empty;
   }
 
-  if (socaCountIn11 >= 2) {
-    const familyWaits = CARD_DEFS_LIST
-      .filter((d) => waitFamilies.has(d.familyId))
-      .map((d) => d.key);
-    return { mode: 'mejaga', waits: familyWaits };
-  }
+  const res: { mode: ReadyMode; waits: CardKey[] } =
+    socaCountIn11 >= 2
+      ? {
+          mode: 'mejaga',
+          waits: CARD_DEFS_LIST.filter((d) => waitFamilies.has(d.familyId)).map((d) => d.key),
+        }
+      : { mode: 'mecari', waits: exactWaits };
 
-  return { mode: 'mecari', waits: exactWaits };
+  if (readyStatusCache.size > 200) readyStatusCache.clear();
+  readyStatusCache.set(cacheKey, res);
+  return res;
 }
 
 /**
