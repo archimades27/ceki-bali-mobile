@@ -315,9 +315,10 @@ class CekiPortraitApp {
       case 'discard_pending':
         return { type: 'discard_pending' };
       case 'discard':
-        return { type: 'discard', cardId: action.cardId };
+        this.selectedCardId = null;
+        return { type: 'discard_hand', cardId: action.cardId };
       case 'reorder':
-        return { type: 'reorder', fromIndex: action.fromIndex, toIndex: action.toIndex };
+        return { type: 'reorder_hand', fromIndex: action.fromIndex, toIndex: action.toIndex };
       case 'sort_hand':
         return { type: 'sort_hand' };
       case 'declare_ceki':
@@ -1514,7 +1515,7 @@ class CekiPortraitApp {
       if (this.dragFromIndex !== index) return;
       const dx = Math.abs(e.clientX - startX);
       const dy = Math.abs(e.clientY - startY);
-      if (!dragging && (dx > 10 || dy > 10)) {
+      if (!dragging && (dx > 16 || dy > 16)) {
         dragging = true;
         if (holdTimer !== null) {
           window.clearTimeout(holdTimer);
