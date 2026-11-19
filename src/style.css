@@ -1069,8 +1069,8 @@ select {
   align-items: flex-end;
   justify-content: center;
   width: 100%;
-  min-height: 122px;
-  padding: 26px 10px 6px;
+  min-height: 128px;
+  padding: 32px 10px 6px;
   gap: 0;
   overflow: visible;
 }
@@ -1106,7 +1106,7 @@ select {
 
 .meld-label-badge {
   position: absolute;
-  top: -11px;
+  top: -26px;
   left: 50%;
   transform: translateX(-50%);
   padding: 1px 6px;
@@ -1115,9 +1115,9 @@ select {
   letter-spacing: 0.4px;
   border-radius: 999px;
   white-space: nowrap;
-  z-index: 18;
+  z-index: 22;
   pointer-events: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
 }
 
 .meld-label-badge--soca {
@@ -1292,12 +1292,12 @@ select {
 .ceki-card.meld-type-lawang::after {
   content: '';
   position: absolute;
-  left: -5px;
-  right: -5px;
-  top: -30px;
-  height: 28px;
+  left: -4px;
+  right: -4px;
+  top: -19px;
+  height: 19px;
   pointer-events: none;
-  z-index: 16;
+  z-index: 14;
   background-repeat: no-repeat;
   background-size: 100% 100%;
   transform-origin: bottom center;
@@ -1309,8 +1309,8 @@ select {
 }
 
 .ceki-card.meld-type-lawang::after {
-  top: -24px;
-  height: 22px;
+  top: -15px;
+  height: 15px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 32'%3E%3Cpath d='M10,32 C12,20 16,14 18,8 C20,16 24,20 26,28 C28,18 30,10 34,4 C36,14 40,18 42,28 C44,20 46,14 49,10 C51,18 52,24 52,32 Z' fill='%23fde047' opacity='0.95'/%3E%3C/svg%3E");
   animation: flame-lick-b 0.55s ease-in-out infinite alternate;
 }

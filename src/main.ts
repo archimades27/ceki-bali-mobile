@@ -146,7 +146,7 @@ class CekiPortraitApp {
     players[0].name = 'Anda';
     players[0].hand = [
       mk('tong1', 1), mk('tong1', 2), mk('tong1', 3),
-      mk('tong2', 1), mk('sok2', 1), mk('ban2', 1),
+      mk('tong2', 1), mk('tong2', 2), mk('sok2', 1),
       mk('tong3', 1), mk('sok3', 1), mk('ban3', 1),
       mk('old_thousand', 1), mk('old_thousand', 2),
     ];
@@ -256,6 +256,17 @@ class CekiPortraitApp {
         this.onlineGuest.send({ type: 'start_round' });
         return;
       }
+      if (
+        action.type === 'discard' ||
+        action.type === 'reorder' ||
+        action.type === 'sort_hand' ||
+        action.type === 'accept_pending' ||
+        action.type === 'discard_pending'
+      ) {
+        // Optimistic instant update so discarding/reordering has zero network lag
+        this.state = this.applyOfflineAction(this.state, action);
+        this.render();
+      }
       this.onlineGuest.send(this.mapActionForHost(action));
       return;
     }
@@ -265,6 +276,16 @@ class CekiPortraitApp {
       if (action.type === 'new_round') {
         this.lanClient.send({ type: 'start_round' });
         return;
+      }
+      if (
+        action.type === 'discard' ||
+        action.type === 'reorder' ||
+        action.type === 'sort_hand' ||
+        action.type === 'accept_pending' ||
+        action.type === 'discard_pending'
+      ) {
+        this.state = this.applyOfflineAction(this.state, action);
+        this.render();
       }
       this.lanClient.send(this.mapActionForHost(action));
       return;
@@ -516,7 +537,13 @@ class CekiPortraitApp {
           () => {
             this.pingMs = this.onlineGuest?.pingMs ?? null;
             this.packetLossPct = this.onlineGuest?.packetLossPct ?? 0;
-            this.render();
+            const netEl = document.querySelector('.hud-net-subrow');
+            if (netEl) {
+              const isWarn = (this.pingMs ?? 0) > 150 || this.packetLossPct > 5;
+              netEl.className = `hud-net-subrow ${isWarn ? 'is-warn' : ''}`;
+              netEl.textContent =
+                this.pingMs !== null ? `📶 ${this.pingMs}ms • ${this.packetLossPct}%` : '📶 Host';
+            }
           }
         );
         this.onlineGuest.connect(code, this.playerName);
@@ -1507,7 +1534,7 @@ class CekiPortraitApp {
         return;
       }
 
-      // Quick tap behavior
+      // Quick tap behavior (toggle selection in-place without full DOM rebuild)
       if (canDiscard) {
         if (this.selectedCardId === card.id) {
           if (this.state && !canDiscardCard(this.state, this.mySeat, card.id)) {
@@ -1526,11 +1553,19 @@ class CekiPortraitApp {
           this.dispatchAction({ type: 'discard', cardId: card.id });
         } else {
           this.selectedCardId = card.id;
-          this.render();
+          document
+            .querySelectorAll('.hand-cards-row .ceki-card.is-selected')
+            .forEach((el) => el.classList.remove('is-selected'));
+          cardEl.classList.add('is-selected');
         }
       } else {
         this.selectedCardId = this.selectedCardId === card.id ? null : card.id;
-        this.render();
+        document
+          .querySelectorAll('.hand-cards-row .ceki-card.is-selected')
+          .forEach((el) => el.classList.remove('is-selected'));
+        if (this.selectedCardId === card.id) {
+          cardEl.classList.add('is-selected');
+        }
       }
     };
 
