@@ -36,6 +36,8 @@ import { TutorialModal } from './ui/tutorial.ts';
 
 type AppMode = 'startup' | 'offline' | 'online_host' | 'online_guest' | 'lan_host' | 'lan_guest';
 
+const APP_VERSION = '0.1.21';
+
 type GameAction =
   | { type: 'draw_stock' }
   | { type: 'ngejuk' }
@@ -664,8 +666,12 @@ class CekiPortraitApp {
       this.render();
     });
 
+    const verEl = document.createElement('p');
+    verEl.className = 'menu-version-text';
+    verEl.textContent = `Ceki Bali Portrait Mobile • v${APP_VERSION}`;
+
     row1.append(newRoundBtn, exitBtn);
-    body.append(row1);
+    body.append(row1, verEl);
     dialog.showModal();
   }
 
@@ -920,8 +926,12 @@ class CekiPortraitApp {
     btnGuide.textContent = 'Panduan Bermain';
     btnGuide.addEventListener('click', () => this.tutorialModal.open());
 
+    const verBadge = document.createElement('div');
+    verBadge.className = 'startup-version';
+    verBadge.textContent = `v${APP_VERSION}`;
+
     actions.append(btnOffline, btnOnline, btnLan, btnGuide);
-    card.append(topFieldsRow, optGrid, actions);
+    card.append(topFieldsRow, optGrid, actions, verBadge);
     screen.appendChild(card);
     return screen;
   }

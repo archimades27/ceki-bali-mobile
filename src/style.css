@@ -246,6 +246,23 @@ select {
   min-height: 42px;
 }
 
+.startup-version {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  opacity: 0.78;
+}
+
+.menu-version-text {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
 /* ========================
    ZONA 1: TOP HUD BAR (Pill Style)
    ======================== */

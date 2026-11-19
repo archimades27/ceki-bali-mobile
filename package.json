@@ -1,6 +1,6 @@
 {
   "name": "ceki-bali-mobile",
-  "version": "1.0.0",
+  "version": "0.1.21",
   "private": true,
   "description": "Ceki Bali — Portrait Mobile Edition (Vertical 9:16 PWA)",
   "type": "module",
