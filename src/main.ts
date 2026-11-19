@@ -613,9 +613,26 @@ class CekiPortraitApp {
   }
 
   private handleRoomPayload(payload: RoomStatePayload): void {
+    const prev = this.state;
     this.roomPayload = payload;
     this.mySeat = payload.mySeat;
     this.state = payload.state;
+
+    // Skip redundant DOM rebuild if optimistic local state already matches host state
+    if (
+      prev &&
+      prev.round === payload.state.round &&
+      prev.currentPlayerIndex === payload.state.currentPlayerIndex &&
+      prev.phase === payload.state.phase &&
+      prev.stock.length === payload.state.stock.length &&
+      prev.lastDiscardPlayerIndex === payload.state.lastDiscardPlayerIndex &&
+      (prev.pendingDrawnCard?.id ?? null) === (payload.state.pendingDrawnCard?.id ?? null) &&
+      prev.players[this.mySeat]?.hand.map((c) => c.id).join(',') ===
+        payload.state.players[this.mySeat]?.hand.map((c) => c.id).join(',')
+    ) {
+      return;
+    }
+
     this.render();
   }
 
